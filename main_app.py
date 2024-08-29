@@ -1,11 +1,12 @@
-import pyttsx3
 import json
 import queue
 import sounddevice as sd
 import vosk
-from vosk import KaldiRecognizer
+from vosk import KaldiRecognizer, Model
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
+import words
+from config.skills import *
 
 # Инициализация голосового движка
 engine = pyttsx3.init()
@@ -15,39 +16,6 @@ def speak(message):
     """Произносит сообщение вслух."""
     engine.say(message)
     engine.runAndWait()
-
-
-def data_set():
-    """Возвращает словарь, сопоставляющий голосовые команды с соответствующими действиями."""
-    return {
-        'привет': lambda: speak('и тебе, привет'),
-        'какая сейчас погода': lambda: speak('weather сейчас скажу'),
-        'какая погода на улице': lambda: speak('weather боишься замерзнуть?'),
-        'что там на улице': lambda: speak('weather сейчас гляну'),
-        'сколько градусов': lambda: speak('weather можешь выглянуть в окно, но сейчас проверю'),
-        'запусти браузер': lambda: speak('browser запускаю браузер'),
-        'открой браузер': lambda: speak('browser открываю браузер'),
-        'открой интернет': lambda: speak('browser интернет активирован'),
-        'играть': lambda: speak('game лишь бы баловаться'),
-        'хочу поиграть в игру': lambda: speak('game а нам лишь бы баловаться'),
-        'запусти игру': lambda: speak('game запускаю, а нам лишь бы баловаться'),
-        'посмотреть фильм': lambda: speak('browser сейчас открою браузер'),
-        'выключи компьютер': lambda: speak('offpc отключаю'),
-        'отключись': lambda: speak('offbot отключаюсь'),
-        'как у тебя дела': lambda: speak('passive работаю в фоне, не переживай'),
-        'что делаешь': lambda: speak('passive жду очередной команды, мог бы и сам на кнопку нажать'),
-        'работаешь': lambda: speak('passive как видишь'),
-        'расскажи анекдот': lambda: speak('passive вчера помыл окна, теперь у меня рассвет на 2 часа раньше'),
-        'ты тут': lambda: speak('passive вроде, да'),
-        'how are you doing today': lambda: speak('passive nice, and what about you'),
-        'good night': lambda: speak('passive bye, bye'),
-        'пока': lambda: speak('passive Пока')
-    }
-
-
-def triggers():
-    """Возвращает набор триггеров голосовых команд."""
-    return set(data_set().keys())
 
 
 # Инициализация очереди для аудиоданных
@@ -72,31 +40,33 @@ def callback(indata, frames, time, status):
 
 def recognize_and_execute(data, vectorizer, clf):
     """Распознает команду из аудио и выполняет соответствующую функцию."""
-    trg = triggers().intersection(data.split())
+    trg = words.triggers.intersection(data.split())
     if not trg:
         return
     # Очистка команды от триггерного слова
-    data = data.replace(list(trg)[0], '')
+    data.replace(list(trg)[0], '')
     # Векторизация входного текста
     text_vec = vectorizer.transform([data]).toarray()[0]
     # Прогнозирование действия
     answer = clf.predict([text_vec])[0]
-    # Выполнение действия
     func_name = answer.split()[0]
-    if func_name in data_set():
-        data_set()[func_name]()
+    speaker(answer.replace(func_name, ''))
+    exec(func_name + '()')
 
 
 def main():
     """Основная функция для настройки распознавания голоса и обработки команд."""
     # Инициализация векторизатора и классификатора
     vectorizer = CountVectorizer()
-    vectors = vectorizer.fit_transform(list(data_set().keys()))
+    vectors = vectorizer.fit_transform(list(words.data_set.keys()))
+
     clf = LogisticRegression()
-    clf.fit(vectors, list(data_set().keys()))
+    clf.fit(vectors, list(words.data_set.values()))
+
+    del words.data_set
 
     # Запуск прослушивания аудиопотока
-    with sd.RawInputStream(samplerate=samplerate, blocksize=8000, device=device[0],
+    with sd.RawInputStream(samplerate=samplerate, blocksize=16000, device=device[0],
                            dtype="int16", channels=1, callback=callback):
         print("Listening...")
 
@@ -105,9 +75,8 @@ def main():
             if rec.AcceptWaveform(data):
                 data = json.loads(rec.Result())['text']
                 recognize_and_execute(data, vectorizer, clf)
-                print(data)
-            else:
-                print(rec.PartialResult())
+            # else:
+            # print(rec.PartialResult())
 
 
 if __name__ == '__main__':

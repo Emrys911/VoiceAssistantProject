@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import webbrowser
+
 import pyttsx3
 import requests
 import speech_recognition as sr
@@ -67,17 +68,22 @@ def suggest_movie():
 
 def game():
     """Start a game."""
-    subprocess.Popen('D:\\Proekti\\snake2_3D\\dist\\main_snake_game.exe')
+    subprocess.Popen('C:\Windows\System32\calc1.exe')
+
+
+
+def browser():
+    webbrowser.open('https://www.facebook.com/', new=2)
 
 
 def play_music():
     """Open a music streaming service in the browser."""
-    webbrowser.open("https://www.spotify.com")
+    webbrowser.open("https://www.youtube.com/", new=3)
 
 
 def offpc():
     """Shut down the computer."""
-    os.system('shutdown /s /t 1')
+    os.system('shutdown')
     print("ноут выключен")
 
 
@@ -150,6 +156,10 @@ def listen_for_command(triggers):
             if any(trigger in command for trigger in triggers):
                 command = command.replace('Siri', '').strip()
                 respond_to_command(command)
+
+
+def passive():
+    pass
 
 
 if __name__ == "__main__":
