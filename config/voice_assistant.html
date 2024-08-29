@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Voice Assistant</title>
+</head>
+<body>
+ <h1>Voice Assistant</h1>
+    <form method="POST" action="/execute-command/">
+        {% csrf_token %}
+        <label>
+            <input type="text" name="command" placeholder="Enter your command here">
+        </label>
+        <button type="submit">Execute</button>
+    </form>
+</body>
+</html>
