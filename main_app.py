@@ -1,8 +1,6 @@
-import json
 import queue
 import sounddevice as sd
 import vosk
-from vosk import KaldiRecognizer, Model
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 import words
@@ -77,6 +75,39 @@ def main():
                 recognize_and_execute(data, vectorizer, clf)
             # else:
             # print(rec.PartialResult())
+
+
+def data_set():
+    """Возвращает словарь, сопоставляющий голосовые команды с соответствующими действиями."""
+    return {
+        'привет': lambda: speak('и тебе, привет'),
+        'какая сейчас погода': lambda: speak(fetch_weather()),
+        'какая погода на улице': lambda: speak(fetch_weather()),
+        'что там на улице': lambda: speak(fetch_weather()),
+        'сколько градусов': lambda: speak(fetch_weather()),
+        'запусти браузер': lambda: speak('browser запускаю браузер'),
+        'открой браузер': lambda: speak('browser открываю браузер'),
+        'открой интернет': lambda: speak('browser интернет активирован'),
+        'играть': lambda: speak('game лишь бы баловаться'),
+        'хочу поиграть в игру': lambda: speak('game а нам лишь бы баловаться'),
+        'запусти игру': lambda: speak('game запускаю, а нам лишь бы баловаться'),
+        'посмотреть фильм': lambda: speak('browser сейчас открою браузер'),
+        'выключи компьютер': lambda: speak('offpc отключаю'),
+        'отключись': lambda: speak('offbot отключаюсь'),
+        'как у тебя дела': lambda: speak('passive работаю в фоне, не переживай'),
+        'что делаешь': lambda: speak('passive жду очередной команды, мог бы и сам на кнопку нажать'),
+        'работаешь': lambda: speak('passive как видишь'),
+        'расскажи анекдот': lambda: speak('passive вчера помыл окна, теперь у меня рассвет на 2 часа раньше'),
+        'ты тут': lambda: speak('passive вроде, да'),
+        'how are you doing today': lambda: speak('passive nice, and what about you'),
+        'good night': lambda: speak('passive bye, bye'),
+        'пока': lambda: speak('passive Пока')
+    }
+
+
+def triggers():
+    """Возвращает набор триггеров голосовых команд."""
+    return set(data_set().keys())
 
 
 if __name__ == '__main__':

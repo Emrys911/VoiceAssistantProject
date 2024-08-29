@@ -35,17 +35,17 @@ def start_scheduler():
     scheduler.start()
 
 
-def fetch_weather():
+def weather():
     """Fetch the current weather information."""
     url = "https://api.openweathermap.org/data/2.5/weather?q=Minsk&appid=f7a51032f4c134dec171910751b38ff4&units=metric&lang=ru"
     response = requests.get(url)
     if response.status_code == 200:
         weather_data = response.json()
-        current_weather = weather_data['weather'][0]
-        temperature = weather_data['main']['temp']
-        return f"Current temperature: {temperature}°C, {current_weather['description']}"
+        description = weather_data["weather"][0]["description"]
+        temp = round(weather_data["main"]["temp"])
+        speaker(f'На улице {description}, {temp} градусов.')
     else:
-        return "Failed to fetch weather data."
+        speaker("Не удалось получить данные о погоде.")
 
 
 def fetch_news():
@@ -89,8 +89,8 @@ def offpc():
 
 # Command to function mapping
 data_set = {
-    "weather": fetch_weather,
-    "browser": lambda: webbrowser.open("https://www.google.com"),
+    "weather": weather,
+    "browser": lambda: webbrowser.open("https://www.facebook.com/"),
     "game": game,
     "offpc": offpc,
     "offbot": sys.exit
@@ -154,7 +154,7 @@ def listen_for_command(triggers):
 
         if command:
             if any(trigger in command for trigger in triggers):
-                command = command.replace('Siri', '').strip()
+                command = command.replace('Сири', '').strip()
                 respond_to_command(command)
 
 
